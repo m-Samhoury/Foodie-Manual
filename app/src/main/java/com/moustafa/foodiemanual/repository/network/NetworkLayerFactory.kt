@@ -1,13 +1,10 @@
 package com.moustafa.foodiemanual.repository.network
 
 import android.content.Context
-import com.chuckerteam.chucker.api.ChuckerInterceptor
+import com.moustafa.foodiemanual.models.Restaurant
+import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
-import okhttp3.CertificatePinner
-import okhttp3.OkHttpClient
-import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
-import java.util.concurrent.TimeUnit
+import com.squareup.moshi.Types
 
 
 /**
@@ -18,23 +15,6 @@ import java.util.concurrent.TimeUnit
  */
 
 object NetworkLayerFactory {
-    private const val TIME_OUTS: Long = 40L
-
-    fun makeHttpClient(context: Context): OkHttpClient =
-        makeHttpClientBuilder(
-            context
-        )
-            .addInterceptor(ChuckerInterceptor(context))
-            .build()
-
-    fun makeHttpClientBuilder(context: Context): OkHttpClient.Builder =
-        OkHttpClient.Builder()
-            .connectTimeout(TIME_OUTS, TimeUnit.SECONDS)
-            .readTimeout(TIME_OUTS, TimeUnit.SECONDS)
-            .writeTimeout(TIME_OUTS, TimeUnit.SECONDS)
-            .certificatePinner(CertificatePinner.DEFAULT)
-            .retryOnConnectionFailure(false)
-
 
     fun createMoshiInstance() = Moshi.Builder()
         .build()
@@ -42,19 +22,24 @@ object NetworkLayerFactory {
 
         }
 
+    fun makeDataSource(
+        restaurantsJsonString: RestaurantsJsonString,
+        adapter: JsonAdapter<List<Restaurant>>
+    ): FoodieDataSource {
+        return FoodieDataSource(restaurantsJsonString, adapter)
+    }
 
-    inline fun <reified T> makeServiceFactory(
-        retrofit: Retrofit
-    ): T = retrofit.create(T::class.java)
+    fun makeRestaurantJsonAdapter(moshi: Moshi): JsonAdapter<List<Restaurant>> {
+        val listType = Types.newParameterizedType(List::class.java, Restaurant::class.java)
+        return moshi.adapter(listType)
+    }
 
-
-    fun makeRetrofit(baseUrl: String, okHttpClient: OkHttpClient): Retrofit {
-        val retrofit = Retrofit.Builder()
-            .baseUrl(baseUrl)
-            .client(okHttpClient)
-            .addConverterFactory(MoshiConverterFactory.create(createMoshiInstance()))
-            .build()
-        return retrofit
+    fun loadData(context: Context,dataLocation: DataLocation): RestaurantsJsonString {
+        val file = dataLocation.string
+        return RestaurantsJsonString(context.assets.open(file).bufferedReader().use { it.readText() })
     }
 
 }
+
+inline class RestaurantsJsonString(val string: String)
+inline class DataLocation(val string: String)
