@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Foodie Manual</string>
+
+
+    <!-- Generic strings -->
+    <string name="generic_error_unknown">Unknown error</string>
+    <string name="action_retry">Retry</string>
+    <string name="toolbar_search">Search</string>
+
 </resources>

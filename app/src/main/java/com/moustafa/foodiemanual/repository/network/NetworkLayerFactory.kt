@@ -1,10 +1,9 @@
 package com.moustafa.foodiemanual.repository.network
 
 import android.content.Context
-import com.moustafa.foodiemanual.models.Restaurant
+import com.moustafa.foodiemanual.models.RestaurantResponse
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
 
 
 /**
@@ -19,27 +18,32 @@ object NetworkLayerFactory {
     fun createMoshiInstance() = Moshi.Builder()
         .build()
         .apply {
-
+            adapter<RestaurantResponse>(RestaurantResponse::class.java)
         }
 
     fun makeDataSource(
         restaurantsJsonString: RestaurantsJsonString,
-        adapter: JsonAdapter<List<Restaurant>>
+        adapter: JsonAdapter<RestaurantResponse>
     ): FoodieDataSource {
         return FoodieDataSource(restaurantsJsonString, adapter)
     }
 
-    fun makeRestaurantJsonAdapter(moshi: Moshi): JsonAdapter<List<Restaurant>> {
-        val listType = Types.newParameterizedType(List::class.java, Restaurant::class.java)
-        return moshi.adapter(listType)
+    fun makeRestaurantJsonAdapter(moshi: Moshi): JsonAdapter<RestaurantResponse> {
+        return moshi.adapter(RestaurantResponse::class.java)
     }
 
-    fun loadData(context: Context,dataLocation: DataLocation): RestaurantsJsonString {
-        val file = dataLocation.string
-        return RestaurantsJsonString(context.assets.open(file).bufferedReader().use { it.readText() })
+    fun loadData(context: Context, dataLocation: DataLocation): RestaurantsJsonString {
+        val fileResourceId = dataLocation.fileResourceId
+        return RestaurantsJsonString(
+            context
+                .resources
+                .openRawResource(fileResourceId)
+                .bufferedReader()
+                .use { it.readText() }
+        )
     }
 
 }
 
 inline class RestaurantsJsonString(val string: String)
-inline class DataLocation(val string: String)
+inline class DataLocation(val fileResourceId: Int)
