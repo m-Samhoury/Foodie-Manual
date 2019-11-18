@@ -3,11 +3,13 @@ package com.moustafa.foodiemanual.ui.restaurantlist
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.moustafa.foodiemanual.R
 import com.moustafa.foodiemanual.models.RestaurantView
+import com.moustafa.foodiemanual.utils.formatted
 import kotlinx.android.synthetic.main.item_restaurant_list.view.*
 
 /**
@@ -65,6 +67,33 @@ class RestaurantsListAdapter(
 
         fun bind(item: RestaurantView) {
             itemView.textViewRestaurantName.text = item.restaurant.name
+            itemView.textViewRestaurantClosed.text = item.restaurant.status
+            itemView.textViewRestaurantSortValue.text = item.sortingValue.formatted()
+
+            val headerColor = when {
+                item.restaurant.isClosed -> {
+                    ContextCompat.getColor(
+                        itemView.context,
+                        R.color.restaurantClosed
+                    )
+                }
+                item.restaurant.isOpened -> {
+                    ContextCompat.getColor(
+                        itemView.context,
+                        R.color.restaurantOpened
+                    )
+                }
+                item.restaurant.isOrderAhead -> {
+                    ContextCompat.getColor(
+                        itemView.context,
+                        R.color.restaurantOrderAhead
+                    )
+                }
+                else -> {
+                    ContextCompat.getColor(itemView.context, R.color.restaurantOrderAhead)
+                }
+            }
+            itemView.viewRestaurantHeaderColor.setBackgroundColor(headerColor)
 
         }
     }

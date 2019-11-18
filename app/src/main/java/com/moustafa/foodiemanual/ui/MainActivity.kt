@@ -16,7 +16,7 @@ import com.moustafa.foodiemanual.R
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
-    private val appBarConfiguration = AppBarConfiguration(emptySet())
+    private val appBarConfiguration = AppBarConfiguration(setOf(R.id.restaurantsListFragment))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

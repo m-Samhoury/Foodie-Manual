@@ -25,7 +25,7 @@ class RestaurantsListViewModel(
     private val state: RestaurantsListState = RestaurantsListState()
 ) : ViewModel() {
     private var searchFor = ""
-    private var currentList: List<RestaurantView> = ArrayList()
+    private var currentSortOption: SortOption = SortOption.BestMatch
 
     private val _stateLiveData = MutableLiveData<RestaurantsListState>()
     val stateLiveData: LiveData<RestaurantsListState> = _stateLiveData
@@ -34,14 +34,17 @@ class RestaurantsListViewModel(
         fetchRestaurantsList()
     }
 
-    private fun fetchRestaurantsList(searchQuery: String = "") {
+    private fun fetchRestaurantsList() {
         if (state.loadRestaurantsList is AsyncState.Loading) return
 
         _stateLiveData.value = state.copy(loadRestaurantsList = AsyncState.Loading)
 
         viewModelScope.launch(Dispatchers.Main) {
             val currentList =
-                repository.fetchRestaurantsList(searchQuery) { exception: Exception ->
+                repository.fetchRestaurantsList(
+                    searchQuery = searchFor,
+                    sortOption = currentSortOption
+                ) { exception: Exception ->
                     _stateLiveData.value =
                         state.copy(loadRestaurantsList = AsyncState.Failed(exception))
                 }
@@ -63,7 +66,23 @@ class RestaurantsListViewModel(
                 return@launch
             }
 
-            fetchRestaurantsList(searchQuery)
+            fetchRestaurantsList()
         }
     }
+
+    fun applySort(sortOption: SortOption) {
+        currentSortOption = sortOption
+        fetchRestaurantsList()
+    }
+}
+
+sealed class SortOption {
+    object BestMatch : SortOption()
+    object Newest : SortOption()
+    object Rating : SortOption()
+    object Distance : SortOption()
+    object Popularity : SortOption()
+    object Price : SortOption()
+    object DeliveryCost : SortOption()
+    object MinimumCharge : SortOption()
 }

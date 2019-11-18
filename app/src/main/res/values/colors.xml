@@ -3,4 +3,11 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+
+    <color name="restaurantOpened">#00FF0C</color>
+    <color name="restaurantClosed">#FF0000</color>
+    <color name="restaurantOrderAhead">#EE8B00</color>
+
+    <color name="black">#000000</color>
+    <color name="grey">#C9C9C9</color>
 </resources>
