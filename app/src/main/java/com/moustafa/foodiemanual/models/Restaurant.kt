@@ -69,3 +69,11 @@ data class RestaurantResponse(
     @field:Json(name = "restaurants")
     val restaurantsList: List<Restaurant>
 )
+
+data class RestaurantView(val restaurant: Restaurant, var isFavorite: Boolean)
+
+@JsonClass(generateAdapter = true)
+data class RestaurantResponse(
+    @field:Json(name = "restaurants")
+    val restaurantsList: List<Restaurant>
+)
