@@ -110,6 +110,7 @@ class RestaurantsListFragment : BaseFragment(R.layout.fragment_restaurants_list)
         } else {
             progressBarLoadingRestaurants.hide()
         }
+        chipGroupSortOptions.isEnabled = !shouldShow
     }
 
     private fun showError(throwable: Throwable, action: (() -> Any)? = null) {

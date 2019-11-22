@@ -22,9 +22,11 @@
             android:id="@+id/chipGroupSortOptions"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            app:checkedChip="@id/chipBestMatch"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:selectionRequired="true"
             app:singleLine="true"
             app:singleSelection="true">
 
