@@ -1,4 +1,4 @@
-package com.moustafa.foodiemanual.repository.network
+package com.moustafa.foodiemanual.repository.filesource
 
 import android.content.Context
 import com.moustafa.foodiemanual.models.RestaurantResponse

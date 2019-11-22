@@ -6,6 +6,7 @@ import android.view.*
 import android.widget.CompoundButton
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.moustafa.foodiemanual.R
@@ -24,7 +25,12 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class RestaurantsListFragment : BaseFragment(R.layout.fragment_restaurants_list) {
 
     private val restaurantsListViewModel: RestaurantsListViewModel by viewModel()
-    private val restaurantsListAdapter: RestaurantsListAdapter = RestaurantsListAdapter()
+    private val restaurantsListAdapter: RestaurantsListAdapter =
+        RestaurantsListAdapter(onFavoriteClicked = ::onFavoriteClicked)
+
+    private fun onFavoriteClicked(view: View, position: Int) {
+        restaurantsListViewModel.toggleFavoriteRestaurant(restaurantsListAdapter.currentList[position])
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -48,6 +54,7 @@ class RestaurantsListFragment : BaseFragment(R.layout.fragment_restaurants_list)
                     start = 8, end = 8
                 )
             )
+            (itemAnimator as DefaultItemAnimator).supportsChangeAnimations = false
         }
 
         chipBestMatch.setOnCheckedChangeListener { _: CompoundButton, _: Boolean ->

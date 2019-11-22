@@ -1,4 +1,4 @@
-package com.moustafa.foodiemanual.repository.network
+package com.moustafa.foodiemanual.repository.filesource
 
 import com.moustafa.foodiemanual.models.Restaurant
 import com.moustafa.foodiemanual.models.RestaurantResponse
@@ -26,5 +26,4 @@ class FoodieDataSource(
     }
 
     fun getRestaurantsList() = restaurantsList
-
 }

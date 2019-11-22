@@ -94,7 +94,11 @@ class RestaurantsListAdapter(
                 }
             }
             itemView.viewRestaurantHeaderColor.setBackgroundColor(headerColor)
-
+            if (item.isFavorite) {
+                itemView.buttonFavoriteRestaurant.setIconResource(R.drawable.ic_star_checked)
+            } else {
+                itemView.buttonFavoriteRestaurant.setIconResource(R.drawable.ic_star_unchecked)
+            }
         }
     }
 }

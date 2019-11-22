@@ -7,4 +7,6 @@
     <string name="action_retry">Retry</string>
     <string name="toolbar_search">Search</string>
 
+    <string name="db_name" translatable="false">foodie_manual</string>
+
 </resources>

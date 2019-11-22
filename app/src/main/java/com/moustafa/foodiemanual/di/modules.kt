@@ -1,13 +1,15 @@
 package com.moustafa.foodiemanual.di
 
+import androidx.room.Room
 import com.moustafa.foodiemanual.R
 import com.moustafa.foodiemanual.models.RestaurantResponse
 import com.moustafa.foodiemanual.repository.Repository
 import com.moustafa.foodiemanual.repository.RepositoryImpl
-import com.moustafa.foodiemanual.repository.network.DataSourceLocation
-import com.moustafa.foodiemanual.repository.network.FoodieDataSource
-import com.moustafa.foodiemanual.repository.network.NetworkLayerFactory
-import com.moustafa.foodiemanual.repository.network.RestaurantsJsonString
+import com.moustafa.foodiemanual.repository.databasesource.AppDatabase
+import com.moustafa.foodiemanual.repository.filesource.DataSourceLocation
+import com.moustafa.foodiemanual.repository.filesource.FoodieDataSource
+import com.moustafa.foodiemanual.repository.filesource.NetworkLayerFactory
+import com.moustafa.foodiemanual.repository.filesource.RestaurantsJsonString
 import com.moustafa.foodiemanual.ui.restaurantlist.RestaurantsListViewModel
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
@@ -41,7 +43,14 @@ val repositoryModule: Module = module {
         NetworkLayerFactory.makeDataSource(restaurantsJsonString = get(), adapter = get())
     }
 
-    single<Repository> { RepositoryImpl(get()) }
+    single<AppDatabase> {
+        Room.databaseBuilder(
+            androidContext(),
+            AppDatabase::class.java, androidContext().resources.getString(R.string.db_name)
+        ).build()
+    }
+
+    single<Repository> { RepositoryImpl(foodieDataSource = get(), roomDatabase = get()) }
 }
 val viewModelsModule: Module = module {
     viewModel { RestaurantsListViewModel(repository = get()) }

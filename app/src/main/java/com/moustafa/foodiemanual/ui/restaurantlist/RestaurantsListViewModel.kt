@@ -74,6 +74,21 @@ class RestaurantsListViewModel(
         currentSortOption = sortOption
         fetchRestaurantsList()
     }
+
+    fun toggleFavoriteRestaurant(restaurantView: RestaurantView) {
+        viewModelScope.launch(Dispatchers.Main) {
+            if (!restaurantView.restaurant.name.isNullOrBlank()) {
+                if (!restaurantView.isFavorite) {
+                    repository.addRestaurantToFavorites(restaurantView.restaurant.name)
+                } else {
+                    repository.removeRestaurantFromFavorites(restaurantView.restaurant.name)
+                }
+                //Refresh all list to reflect the new changes
+                fetchRestaurantsList()
+            }
+        }
+
+    }
 }
 
 sealed class SortOption {

@@ -1,8 +1,10 @@
 package com.moustafa.foodiemanual.repository
 
+import com.moustafa.foodiemanual.models.FavoriteRestaurant
 import com.moustafa.foodiemanual.models.Restaurant
 import com.moustafa.foodiemanual.models.RestaurantView
-import com.moustafa.foodiemanual.repository.network.FoodieDataSource
+import com.moustafa.foodiemanual.repository.databasesource.AppDatabase
+import com.moustafa.foodiemanual.repository.filesource.FoodieDataSource
 import com.moustafa.foodiemanual.ui.restaurantlist.SortOption
 
 /**
@@ -10,7 +12,10 @@ import com.moustafa.foodiemanual.ui.restaurantlist.SortOption
  * created on Monday, 04 Nov, 2019
  */
 
-class RepositoryImpl(private val foodieDataSource: FoodieDataSource) : Repository {
+class RepositoryImpl(
+    private val foodieDataSource: FoodieDataSource,
+    private val roomDatabase: AppDatabase
+) : Repository {
 
     override suspend fun fetchRestaurantsList(
         searchQuery: String,
@@ -30,29 +35,46 @@ class RepositoryImpl(private val foodieDataSource: FoodieDataSource) : Repositor
             foodieDataSource.getRestaurantsList()
                 .filter { it.openStatusSortValue == Restaurant.RESTAURANT_STATUS_CLOSED }
 
+        val favoriteRestaurants = roomDatabase.favoriteRestaurantDao().getAllFavoriteRestaurants()
 
         val openedRestaurantsViewList =
-            applyRestaurantFiltersAndSortAndTransform(openedRestaurants, searchQuery, sortOption)
+            applyRestaurantFiltersAndSortAndTransform(
+                openedRestaurants,
+                searchQuery,
+                sortOption,
+                favoriteRestaurants
+            ).groupBy { it.isFavorite }
 
         val orderAheadRestaurantsViewList =
             applyRestaurantFiltersAndSortAndTransform(
                 orderAheadRestaurants,
                 searchQuery,
-                sortOption
-            )
+                sortOption,
+                favoriteRestaurants
+            ).groupBy { it.isFavorite }
 
         val closedRestaurantsViewList =
-            applyRestaurantFiltersAndSortAndTransform(closedRestaurants, searchQuery, sortOption)
+            applyRestaurantFiltersAndSortAndTransform(
+                closedRestaurants,
+                searchQuery,
+                sortOption,
+                favoriteRestaurants
+            ).groupBy { it.isFavorite }
+        //true to get the favorite part of the list and false to get the unfavorite part of the list
+        return (openedRestaurantsViewList[true] ?: emptyList())
+            .plus(orderAheadRestaurantsViewList[true] ?: emptyList())
+            .plus(closedRestaurantsViewList[true] ?: emptyList())
+            .plus(openedRestaurantsViewList[false] ?: emptyList())
+            .plus(orderAheadRestaurantsViewList[false] ?: emptyList())
+            .plus(closedRestaurantsViewList[false] ?: emptyList())
 
-        return openedRestaurantsViewList
-            .plus(orderAheadRestaurantsViewList)
-            .plus(closedRestaurantsViewList)
     }
 
     private fun applyRestaurantFiltersAndSortAndTransform(
         list: List<Restaurant>,
         searchQuery: String,
-        sortOption: SortOption
+        sortOption: SortOption,
+        favoriteRestaurants: List<FavoriteRestaurant>?
     ) =
         list.filter {
             it.name?.contains(searchQuery, ignoreCase = true) == true
@@ -78,6 +100,26 @@ class RepositoryImpl(private val foodieDataSource: FoodieDataSource) : Repositor
                 SortOption.DeliveryCost -> it.sortingValues?.deliveryCosts ?: 0.0
                 SortOption.MinimumCharge -> it.sortingValues?.minCost ?: 0.0
             }
-            RestaurantView(restaurant = it, isFavorite = false, sortingValue = sortingValue)
+            RestaurantView(
+                restaurant = it,
+                isFavorite = favoriteRestaurants?.any { favoriteRestaurant ->
+                    favoriteRestaurant.restaurantName == it.name
+                } ?: false,
+                sortingValue = sortingValue
+            )
         }
+
+    override suspend fun addRestaurantToFavorites(restaurantName: String): FavoriteRestaurant {
+        val favoriteRestaurant = FavoriteRestaurant(restaurantName)
+        roomDatabase.favoriteRestaurantDao()
+            .insertRestaurantToFavorites(favoriteRestaurant)
+        return favoriteRestaurant
+    }
+
+    override suspend fun removeRestaurantFromFavorites(restaurantName: String): FavoriteRestaurant {
+        val favoriteRestaurant = FavoriteRestaurant(restaurantName)
+        roomDatabase.favoriteRestaurantDao()
+            .removeRestaurantFromFavorites(FavoriteRestaurant(restaurantName))
+        return favoriteRestaurant
+    }
 }
